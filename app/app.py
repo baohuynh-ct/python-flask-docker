@@ -1,17 +1,24 @@
-from flask import Flask,render_template
-import socket
+#!/usr/bin/python
 
-app = Flask(__name__)
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
-@app.route("/")
-def index():
-    try:
-        host_name = socket.gethostname()
-        host_ip = socket.gethostbyname(host_name)
-        return render_template('index.html', hostname=host_name, ip=host_ip)
-    except:
-        return render_template('error.html')
+PORT_NUMBER = 8080
 
+class MyHandler(BaseHTTPRequestHandler):
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8080)
+  def do_GET(self):
+    """Handler for GET requests"""
+    self.send_response(200)
+    self.send_header('Content-type','image/png')
+    self.end_headers()
+    with open('logo.png', 'rb') as f:
+      self.wfile.write(f.read())
+
+try:
+  server = HTTPServer(('', PORT_NUMBER), MyHandler)
+  print('Started httpserver on port', PORT_NUMBER)
+  server.serve_forever()
+
+except KeyboardInterrupt:
+  server.server_close()
+  print('Stopping server')
